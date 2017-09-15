@@ -394,6 +394,7 @@ void RunExper(bool                                bPrintProgress,
           LOG(LIB_INFO) << "Saving an index for test set id " << TestSetId << " using location: " << adjSaveLoc;
           IndexPtr->SaveIndex(adjSaveLoc);
         }
+		IndexPtr->SaveIndex(adjSaveLoc);
         wtm.split();
         const double SaveTime  = double(wtm.elapsed())/1e6;
     
