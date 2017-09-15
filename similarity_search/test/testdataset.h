@@ -26,7 +26,8 @@ namespace similarity {
 
 using std::string;
 
-const string sampleDataPrefix = string("..") + PATH_SEPARATOR + string("sample_data") + PATH_SEPARATOR;
+//const string sampleDataPrefix = string("..") + PATH_SEPARATOR + string("..") + PATH_SEPARATOR + string("sample_data") + PATH_SEPARATOR;
+const string sampleDataPrefix = string("D:\\VisualStudioWorkSpace\\nmslib\\sample_data") + PATH_SEPARATOR;
 
 class TestDataset {
  public:
