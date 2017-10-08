@@ -46,10 +46,11 @@ class Query {
   virtual bool CheckAndAddToResult(const dist_t distance, const Object* object) = 0;
   virtual void Print() const = 0;
 
+  mutable uint64_t distance_computations_;
+
  protected:
   const Space<dist_t>& space_;
   const Object* query_object_;
-  mutable uint64_t distance_computations_;
 
   // disable copy and assign
   DISABLE_COPY_AND_ASSIGN(Query);

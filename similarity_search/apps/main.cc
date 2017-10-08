@@ -394,7 +394,12 @@ void RunExper(bool                                bPrintProgress,
           LOG(LIB_INFO) << "Saving an index for test set id " << TestSetId << " using location: " << adjSaveLoc;
           IndexPtr->SaveIndex(adjSaveLoc);
         }
-		IndexPtr->SaveIndex(adjSaveLoc);
+		if (bCreate) {
+			IndexPtr->SaveGraph("graph_connection_file.txt");
+		}
+		else {
+			IndexPtr->SaveGraphFromOptIndex("graph_connection_file_from_opt_index.txt");
+		}
         wtm.split();
         const double SaveTime  = double(wtm.elapsed())/1e6;
     

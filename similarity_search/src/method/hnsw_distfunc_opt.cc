@@ -46,7 +46,7 @@
 #define USE_AVX
 #endif
 
-//#define DIST_CALC
+#define DIST_CALC
 namespace similarity {
     float
     L2SqrSIMD16Ext(const float *pVect1, const float *pVect2, size_t &qty, float *TmpRes)

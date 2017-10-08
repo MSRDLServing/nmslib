@@ -143,6 +143,109 @@ namespace similarity {
         out.close();
         return;
     }
+
+	template <typename dist_t>
+	void Hnsw<dist_t>::fillOrder(int v, bool visited[], stack<int> &Stack)
+	{
+		// Mark the current node as visited and print it
+		visited[v] = true;
+
+		// Recur for all the vertices adjacent to this vertex at the ground layer
+		const vector<HnswNode *> &neighbor = ElList_[v]->getAllFriends(0);
+		for (auto iter = neighbor.begin(); iter != neighbor.end(); ++iter) {
+			int id = (*iter)->getId();
+			if (!visited[id]) {
+				fillOrder(id, visited, Stack);
+			}
+		}
+
+		// All vertices reachable from v are processed by now, push v 
+		Stack.push(v);
+	}
+
+	template <typename dist_t>
+	void Hnsw<dist_t>::getTranspose(ElementList &grElList)
+	{
+		int sizeV = data_.size();
+		for (int v = 0; v < sizeV; ++v) {
+
+			const vector<HnswNode *> &neighbor = ElList_[v]->getAllFriends(0);
+			for (auto iter = neighbor.begin(); iter != neighbor.end(); ++iter) {
+				int id = (*iter)->getId();
+				if (grElList[id] == nullptr) {
+					HnswNode *node = new HnswNode(data_[id], id);
+					node->init(0, maxM_, maxM0_);
+					grElList[id] = node;
+				}
+				if (grElList[v] == nullptr) {
+					HnswNode *node = new HnswNode(data_[v], v);
+					node->init(0, maxM_, maxM0_);
+					grElList[v] = node;
+				}
+				grElList[id]->allFriends[0].push_back(grElList[v]);
+			}
+		}
+	}
+
+	template <typename dist_t>
+	void Hnsw<dist_t>::dfsSearchSCC(ElementList grElList, int v, bool visited[]) {
+		// Mark the current node as visited and print it
+		visited[v] = true;
+
+		// Recur for all the vertices adjacent to this vertex at the ground layer
+		const vector<HnswNode *> &neighbor = grElList[v]->getAllFriends(0);
+		for (auto iter = neighbor.begin(); iter != neighbor.end(); ++iter) {
+			int id = (*iter)->getId();
+			if (!visited[id]) {
+				dfsSearchSCC(grElList, id, visited);
+			}
+		}
+	}
+
+	template <typename dist_t>
+	void Hnsw<dist_t>::AmendHnswConnectivity()
+	{
+		stack<int> Stack;
+
+		int sizeV = data_.size();
+		bool *visited = new bool[sizeV];
+		for (int i = 0; i < sizeV; i++) {
+			visited[i] = false;
+		}
+
+		for (int i = 0; i < sizeV; i++) {
+			if (visited[i] == false) {
+				fillOrder(i, visited, Stack);
+			}
+		}
+
+		ElementList grElList_;
+		grElList_.resize(sizeV);
+
+		getTranspose(grElList_);
+
+		// Mark all the vertices as not visited (For second DFS)
+		for (int i = 0; i < sizeV; i++) {
+			visited[i] = false;
+		}
+
+		int prevSCC = -1;
+		while (Stack.empty() == false) {
+			int v = Stack.top();
+			Stack.pop();
+
+			if (visited[v] == false) {
+				dfsSearchSCC(grElList_, v, visited);
+
+				if (prevSCC >= 0) {
+					ElList_[v]->allFriends[0].push_back(ElList_[prevSCC]);
+					ElList_[prevSCC]->allFriends[0].push_back(ElList_[v]);
+ 				}
+				prevSCC = v;
+			}
+		}
+	}
+
     template <typename dist_t>
     void
     Hnsw<dist_t>::CreateIndex(const AnyParams &IndexParams)
@@ -295,6 +398,10 @@ namespace similarity {
 
         data_level0_memory_ = NULL;
         linkLists_ = NULL;
+
+		AmendHnswConnectivity();
+
+		AmendHnswConnectivity();
 
         if (skip_optimized_index) {
             LOG(LIB_INFO) << "searchMethod			  = " << searchMethod_;
@@ -745,6 +852,74 @@ namespace similarity {
         output.close();
     }
 
+	template <typename dist_t>
+	void Hnsw<dist_t>::SaveGraph(const string &location)
+	{
+
+		std::ofstream output(location);
+		CHECK_MSG(output, "Cannot open file '" + location + "' for writing");
+		streampos position;
+
+		totalElementsStored_ = ElList_.size();
+		for (size_t i = 0; i < totalElementsStored_; i++) {
+			int maxLevel = ElList_[i]->level;
+			for (int j = 0; j <= maxLevel; j++) {
+				// Print out the current node first
+				output << ElList_[i]->getId() << "\t";
+				// Print out all the neighbors of the current node at level j
+				vector<HnswNode *> neighbor = ElList_[i]->getAllFriends(j);
+				for (int k = 0; k < neighbor.size(); k++) {
+					output << neighbor[k]->getId() << "\t";
+				}
+				output << "\n";
+			}
+		};
+		output.close();
+	}
+		
+	template <typename dist_t>
+	void Hnsw<dist_t>::SaveGraphFromOptIndex(const string &location)
+	{
+
+		std::ofstream output(location);
+		CHECK_MSG(output, "Cannot open file '" + location + "' for writing");
+		streampos position;
+
+		for (int curNodeNum = 0; curNodeNum < totalElementsStored_; curNodeNum++) {
+			int *data = (int *)(linkLists_[curNodeNum]);
+			uint32_t linkListSize = linkListSizes[curNodeNum];
+			if (linkListSize != 0) {
+				int level = linkListSize / ((maxM_ + 1) * sizeof(int));
+				// Upper level connection list
+				for (int l = 1; l <= level; l++) {
+					// Print out the current node first
+					output << curNodeNum << "\t";
+					int size = *data;
+					data += 1;
+					// Print out all the neighbors of the current node at level j
+					for (int i = 0; i < size; i++) {
+						int tnum = *(data + i);
+						output << tnum << "\t";
+					}
+					output << "\n";
+					data += maxM_;
+				}
+			}
+
+			// Ground level connection list
+			int *data0 = (int *)(data_level0_memory_ + curNodeNum * memoryPerObject_ + offsetLevel0_);
+			int size0 = *data0;
+			data0 += 1;
+			output << curNodeNum << "\t";
+			for (int j = 0; j < size0; j++) {
+				int tnum0 = *(data0 + j);
+				output << tnum0 << "\t";
+			}
+			output << "\n";
+		};
+		output.close();
+	}
+
     template <typename dist_t>
     void
     Hnsw<dist_t>::LoadIndex(const string &location)
@@ -782,6 +957,7 @@ namespace similarity {
         data_level0_memory_ = (char *)malloc(data_plus_links0_size);
         input.read(data_level0_memory_, data_plus_links0_size);
         linkLists_ = (char **)malloc(sizeof(void *) * totalElementsStored_);
+		linkListSizes = (uint32_t *)malloc(sizeof(uint32_t) * totalElementsStored_);
 
         data_rearranged_.resize(totalElementsStored_);
 
@@ -791,9 +967,11 @@ namespace similarity {
             position = input.tellg();
             if (linkListSize == 0) {
                 linkLists_[i] = nullptr;
+				linkListSizes[i] = 0;
             } else {
                 linkLists_[i] = (char *)malloc(linkListSize);
                 input.read(linkLists_[i], linkListSize);
+				linkListSizes[i] = linkListSize;
             }
             data_rearranged_[i] = new Object(data_level0_memory_ + (i)*memoryPerObject_ + offsetData_);
         }

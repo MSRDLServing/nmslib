@@ -39,6 +39,8 @@
 #include <set>
 #include <thread>
 #include <unordered_set>
+#include <list>
+#include <stack>
 
 #define METH_HNSW "hnsw"
 #define METH_HNSW_SYN "Hierarchical_NSW"
@@ -269,13 +271,17 @@ namespace similarity {
             allFriends[level].push_back(element);
             bool shrink = false;
             if (level > 0) {
-                if (allFriends[level].size() > maxsize) {
-                    shrink = true;
+                if (allFriends[level].size() > maxsize) {					
+					// HNSW-Fix: Do not shrink friend list 
+					shrink = true;
+					//shrink = false;
                 } else {
                     shrink = false;
                 }
             } else if (allFriends[level].size() > maxsize0) {
+				// HNSW-Fix: Do not shrink friend list 
                 shrink = true;
+				//shrink = false;
             } else {
                 shrink = false;
             }
@@ -455,6 +461,8 @@ namespace similarity {
     template <typename dist_t> class Hnsw : public Index<dist_t> {
     public:
         virtual void SaveIndex(const string &location) override;
+		virtual void SaveGraph(const string &location) override;
+		virtual void SaveGraphFromOptIndex(const string &location) override;
 
         virtual void LoadIndex(const string &location) override;
 
@@ -535,7 +543,8 @@ namespace similarity {
         bool iscosine_ = false;
         size_t offsetData_, offsetLevel0_;
         char *data_level0_memory_;
-        char **linkLists_;
+		char **linkLists_;
+		uint32_t *linkListSizes;
         size_t memoryPerObject_;
         float (*fstdistfunc_)(const float *pVect1, const float *pVect2, size_t &qty, float *TmpRes);
 
@@ -545,6 +554,12 @@ namespace similarity {
 
     protected:
         DISABLE_COPY_AND_ASSIGN(Hnsw);
+	public:
+		// HNSW-FIX: SCC
+		void AmendHnswConnectivity();
+		void fillOrder(int v, bool visited[], stack<int> &Stack);
+		void getTranspose(ElementList &grElList);
+		void dfsSearchSCC(ElementList grElList, int v, bool visited[]);
     };
 
     typedef unsigned char vl_type;
