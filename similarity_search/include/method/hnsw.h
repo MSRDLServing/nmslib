@@ -559,7 +559,9 @@ namespace similarity {
 		void AmendHnswConnectivity();
 		void fillOrder(int v, bool visited[], stack<int> &Stack);
 		void getTranspose(ElementList &grElList);
-		void dfsSearchSCC(ElementList grElList, int v, bool visited[]);
+		void dfsSearchSCC(ElementList &grElList, int v, bool visited[]);
+		void InjectRandomness();
+		void RewireExistingLinks();
     };
 
     typedef unsigned char vl_type;

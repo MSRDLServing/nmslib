@@ -44,6 +44,7 @@
 #include <sstream>
 #include <typeinfo>
 #include <vector>
+#include <random>
 
 #include "sort_arr_bi.h"
 #define MERGE_BUFFER_ALGO_SWITCH_THRESHOLD 100
@@ -188,7 +189,7 @@ namespace similarity {
 	}
 
 	template <typename dist_t>
-	void Hnsw<dist_t>::dfsSearchSCC(ElementList grElList, int v, bool visited[]) {
+	void Hnsw<dist_t>::dfsSearchSCC(ElementList &grElList, int v, bool visited[]) {
 		// Mark the current node as visited and print it
 		visited[v] = true;
 
@@ -242,6 +243,49 @@ namespace similarity {
 					ElList_[prevSCC]->allFriends[0].push_back(ElList_[v]);
  				}
 				prevSCC = v;
+			}
+		}
+	}
+
+	// Random 0-to-N1 Function.
+	// Generate a random integer from 0 to N-1, with each
+	//  integer an equal probability.
+	//
+	int rand_0toN1(int n) {
+		return rand() % n;
+	}
+
+	template <typename dist_t>
+	void Hnsw<dist_t>::InjectRandomness()
+	{
+		srand(42); // Set seed for randomizing.
+
+		int sizeV = data_.size();
+		for (int v = 0; v < sizeV; ++v) {
+			int random_integer = rand_0toN1(sizeV);
+			int prob = (rand() % 100);
+			
+			if (prob < 50) {
+				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
+			}			
+		}
+	}
+
+	template <typename dist_t>
+	void Hnsw<dist_t>::RewireExistingLinks()
+	{
+		srand(42); // Set seed for randomizing.
+
+		int sizeV = data_.size();
+		for (int v = 0; v < sizeV; ++v) {
+			int random_integer = rand_0toN1(sizeV);
+			int prob = (rand() % 100);
+
+			if (prob < 100) {
+				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
+				int pos = (rand() % ElList_[v]->allFriends[0].size());
+				std::swap(ElList_[v]->allFriends[0][pos], ElList_[v]->allFriends[0].back());
+				ElList_[v]->allFriends[0].pop_back();
 			}
 		}
 	}
@@ -399,9 +443,13 @@ namespace similarity {
         data_level0_memory_ = NULL;
         linkLists_ = NULL;
 
+		RewireExistingLinks();
+
 		AmendHnswConnectivity();
 
 		AmendHnswConnectivity();
+
+		//InjectRandomness();
 
         if (skip_optimized_index) {
             LOG(LIB_INFO) << "searchMethod			  = " << searchMethod_;
