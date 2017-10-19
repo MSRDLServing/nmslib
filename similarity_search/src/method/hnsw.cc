@@ -165,6 +165,35 @@ namespace similarity {
 	}
 
 	template <typename dist_t>
+	void Hnsw<dist_t>::orderByFinishingTime(int v, bool visited[], stack<int> &Stack, vector<int> &topoSortOrder) {
+
+			
+		visited[v] = true;
+		Stack.push(v);
+		while (!Stack.empty()) {
+			v = Stack.top();
+			Stack.pop();
+			if (v >= 0) {
+				// the trick
+				Stack.push(-v - 1);
+
+				const vector<HnswNode *> &neighbor = ElList_[v]->getAllFriends(0);
+				for (auto iter = neighbor.begin(); iter != neighbor.end(); ++iter) {
+					int id = (*iter)->getId();
+					if (!visited[id]) {
+						visited[id] = true;
+						Stack.push(id);
+					}
+				}
+			}
+			else {
+				// Vertex post-processing happens here
+				topoSortOrder.push_back(-v - 1);
+			}
+		}
+	}
+
+	template <typename dist_t>
 	void Hnsw<dist_t>::getTranspose(ElementList &grElList)
 	{
 		int sizeV = data_.size();
@@ -204,10 +233,46 @@ namespace similarity {
 	}
 
 	template <typename dist_t>
+	void Hnsw<dist_t>::dfsSearchSCCNonRecur(ElementList &grElList, int v, bool visited[]) {
+		// Create a stack for DFS
+		stack<int> stack;
+
+		// Push the current source node.
+		stack.push(v);
+
+		while (!stack.empty())
+		{
+			// Pop a vertex from stack and print it
+			v = stack.top();
+			stack.pop();
+
+			// Stack may contain same vertex twice. So
+			// we need to print the popped item only
+			// if it is not visited.
+			if (!visited[v])
+			{
+				//cout << v << " ";
+				visited[v] = true;
+			}
+
+			// Get all adjacent vertices of the popped vertex s
+			// If a adjacent has not been visited, then puah it
+			// to the stack.
+			const vector<HnswNode *> &neighbor = grElList[v]->getAllFriends(0);
+			for (auto iter = neighbor.begin(); iter != neighbor.end(); ++iter) {
+				int id = (*iter)->getId();
+				if (!visited[id]) {
+					stack.push(id);
+				}
+			}
+		}
+	}
+
+	template <typename dist_t>
 	void Hnsw<dist_t>::AmendHnswConnectivity()
 	{
 		stack<int> Stack;
-
+		
 		int sizeV = data_.size();
 		bool *visited = new bool[sizeV];
 		for (int i = 0; i < sizeV; i++) {
@@ -231,7 +296,7 @@ namespace similarity {
 		}
 
 		int prevSCC = -1;
-		while (Stack.empty() == false) {
+		while (Stack.empty() == false) {		
 			int v = Stack.top();
 			Stack.pop();
 
@@ -242,6 +307,48 @@ namespace similarity {
 					ElList_[v]->allFriends[0].push_back(ElList_[prevSCC]);
 					ElList_[prevSCC]->allFriends[0].push_back(ElList_[v]);
  				}
+				prevSCC = v;
+			}
+		}
+	}
+
+	template <typename dist_t>
+	void Hnsw<dist_t>::AmendHnswConnectivityUsingNonRecursiveDfs() {
+		vector<int> ordered;
+		stack<int> stack;
+		int sizeV = data_.size();
+		bool *visited = new bool[sizeV];
+		for (int i = 0; i < sizeV; i++) {
+			visited[i] = false;
+		}
+		 
+		for (int i = 0; i < sizeV; i++) {
+			if (visited[i] == false) {
+				orderByFinishingTime(i, visited, stack, ordered);
+			}
+		}
+
+		ElementList grElList_;
+		grElList_.resize(sizeV);
+
+		getTranspose(grElList_);
+
+		// Mark all the vertices as not visited (For second DFS)
+		for (int i = 0; i < sizeV; i++) {
+			visited[i] = false;
+		}
+
+		int prevSCC = -1;
+		for (int i = ordered.size() - 1; i >= 0; i--) {
+			int v = ordered[i];
+
+			if (visited[v] == false) {
+				dfsSearchSCCNonRecur(grElList_, v, visited);
+
+				if (prevSCC >= 0) {
+					ElList_[v]->allFriends[0].push_back(ElList_[prevSCC]);
+					ElList_[prevSCC]->allFriends[0].push_back(ElList_[v]);
+				}
 				prevSCC = v;
 			}
 		}
@@ -281,7 +388,7 @@ namespace similarity {
 			int random_integer = rand_0toN1(sizeV);
 			int prob = (rand() % 100);
 
-			if (prob < 100) {
+			if (prob < 50) {
 				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
 				int pos = (rand() % ElList_[v]->allFriends[0].size());
 				std::swap(ElList_[v]->allFriends[0][pos], ElList_[v]->allFriends[0].back());
@@ -443,11 +550,15 @@ namespace similarity {
         data_level0_memory_ = NULL;
         linkLists_ = NULL;
 
-		RewireExistingLinks();
+		//RewireExistingLinks();
 
-		AmendHnswConnectivity();
+		//AmendHnswConnectivity();
 
-		AmendHnswConnectivity();
+		//AmendHnswConnectivity();
+
+		AmendHnswConnectivityUsingNonRecursiveDfs(); 
+
+		AmendHnswConnectivityUsingNonRecursiveDfs();
 
 		//InjectRandomness();
 

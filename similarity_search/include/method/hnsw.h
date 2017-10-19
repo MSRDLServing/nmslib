@@ -557,9 +557,12 @@ namespace similarity {
 	public:
 		// HNSW-FIX: SCC
 		void AmendHnswConnectivity();
+		void AmendHnswConnectivityUsingNonRecursiveDfs();
 		void fillOrder(int v, bool visited[], stack<int> &Stack);
+		void orderByFinishingTime(int v, bool visited[], stack<int> &Stack, vector<int> &topoSortOrder);
 		void getTranspose(ElementList &grElList);
 		void dfsSearchSCC(ElementList &grElList, int v, bool visited[]);
+		void dfsSearchSCCNonRecur(ElementList &grElList, int v, bool visited[]);
 		void InjectRandomness();
 		void RewireExistingLinks();
     };
