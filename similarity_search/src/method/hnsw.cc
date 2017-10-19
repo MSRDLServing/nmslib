@@ -269,7 +269,7 @@ namespace similarity {
 	}
 
 	template <typename dist_t>
-	void Hnsw<dist_t>::AmendHnswConnectivity()
+	void Hnsw<dist_t>::ConnectivityAugmentationRecursive()
 	{
 		stack<int> Stack;
 		
@@ -313,7 +313,7 @@ namespace similarity {
 	}
 
 	template <typename dist_t>
-	void Hnsw<dist_t>::AmendHnswConnectivityUsingNonRecursiveDfs() {
+	void Hnsw<dist_t>::ConnectivityAugmentationNonRecursive() {
 		vector<int> ordered;
 		stack<int> stack;
 		int sizeV = data_.size();
@@ -363,7 +363,7 @@ namespace similarity {
 	}
 
 	template <typename dist_t>
-	void Hnsw<dist_t>::InjectRandomness()
+	void Hnsw<dist_t>::InjectRandomnessByAdding(int random_factor)
 	{
 		srand(42); // Set seed for randomizing.
 
@@ -372,14 +372,14 @@ namespace similarity {
 			int random_integer = rand_0toN1(sizeV);
 			int prob = (rand() % 100);
 			
-			if (prob < 50) {
+			if (prob < random_factor) {
 				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
 			}			
 		}
 	}
 
 	template <typename dist_t>
-	void Hnsw<dist_t>::RewireExistingLinks()
+	void Hnsw<dist_t>::InjectRandomnessByRewiring(int random_factor)
 	{
 		srand(42); // Set seed for randomizing.
 
@@ -388,7 +388,7 @@ namespace similarity {
 			int random_integer = rand_0toN1(sizeV);
 			int prob = (rand() % 100);
 
-			if (prob < 50) {
+			if (prob < random_factor) {
 				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
 				int pos = (rand() % ElList_[v]->allFriends[0].size());
 				std::swap(ElList_[v]->allFriends[0][pos], ElList_[v]->allFriends[0].back());
@@ -428,6 +428,12 @@ namespace similarity {
         pmgr.GetParamOptional("post", post_, 0);
         int skip_optimized_index = 0;
         pmgr.GetParamOptional("skip_optimized_index", skip_optimized_index, 0);
+		int connectivity_augmentation = 0;
+		pmgr.GetParamOptional("connectivity_augmentation", connectivity_augmentation, 0);
+		int inject_randomness = 0;
+		pmgr.GetParamOptional("inject_randomness", inject_randomness, 0); // 0: No injection of randomness, 1: Add random links,  2: rewire existing links
+		int random_factor = 0;
+		pmgr.GetParamOptional("random_factor", random_factor, 50); // Random factor is in the range of 0 to 100
 
         LOG(LIB_INFO) << "M                   = " << M_;
         LOG(LIB_INFO) << "indexThreadQty      = " << indexThreadQty_;
@@ -438,6 +444,10 @@ namespace similarity {
         LOG(LIB_INFO) << "mult                = " << mult_;
         LOG(LIB_INFO) << "skip_optimized_index= " << skip_optimized_index;
         LOG(LIB_INFO) << "delaunay_type       = " << delaunay_type_;
+
+		LOG(LIB_INFO) << "connectivity_augmentation= " << connectivity_augmentation;
+		LOG(LIB_INFO) << "inject_randomness       = " << inject_randomness;
+		LOG(LIB_INFO) << "random_factor       = " << random_factor;
 
         SetQueryTimeParams(getEmptyParams());
 
@@ -550,17 +560,20 @@ namespace similarity {
         data_level0_memory_ = NULL;
         linkLists_ = NULL;
 
-		//RewireExistingLinks();
+		if (inject_randomness == 2) {
+			InjectRandomnessByRewiring(random_factor);
+		}
 
-		//AmendHnswConnectivity();
+		if (connectivity_augmentation) {
+			ConnectivityAugmentationNonRecursive();
+			ConnectivityAugmentationNonRecursive();
+			//ConnectivityAugmentationRecursive();
+			//ConnectivityAugmentationRecursive();
+		}		
 
-		//AmendHnswConnectivity();
-
-		AmendHnswConnectivityUsingNonRecursiveDfs(); 
-
-		AmendHnswConnectivityUsingNonRecursiveDfs();
-
-		//InjectRandomness();
+		if (inject_randomness == 1) {
+			InjectRandomnessByAdding(random_factor);
+		}
 
         if (skip_optimized_index) {
             LOG(LIB_INFO) << "searchMethod			  = " << searchMethod_;
