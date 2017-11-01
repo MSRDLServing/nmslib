@@ -46,6 +46,8 @@
 #define USE_AVX
 #endif
 
+// HNSW-FIX: Enable AVX for distance computation.
+#define USE_AVX
 #define DIST_CALC
 namespace similarity {
     float

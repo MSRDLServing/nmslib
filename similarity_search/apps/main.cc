@@ -363,8 +363,11 @@ void RunExper(bool                                bPrintProgress,
 
         if (bCreate) {
           LOG(LIB_INFO) << "Creating an index from scratch";
-
+		  clock_t begin = clock();
           IndexPtr->CreateIndex(*IndexTimeParams);
+		  clock_t end = clock();
+		  double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+		  LOG(LIB_INFO) << ">>>> index build time:  " << elapsed_secs << " s";
         } else {
           LOG(LIB_INFO) << "Loading an index for test set id " << TestSetId << " using location: " << adjLoadLoc;
           IndexPtr->LoadIndex(adjLoadLoc);
@@ -411,6 +414,8 @@ void RunExper(bool                                bPrintProgress,
         LOG(LIB_INFO) << ">>>> Indexing time:         " << IndexTime            << " sec";
         LOG(LIB_INFO) << ">>>> Index loading time:    " << LoadTime             << " sec";
         LOG(LIB_INFO) << ">>>> Index saving  time:    " << SaveTime             << " sec";
+
+		IndexPtr->ReportStats();
 
         for (size_t qtmParamId = 0; qtmParamId < QueryTimeParams.size(); ++qtmParamId) {
           for (size_t i = 0; i < config.GetRange().size(); ++i) {

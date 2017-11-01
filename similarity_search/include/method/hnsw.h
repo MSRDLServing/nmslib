@@ -465,6 +465,7 @@ namespace similarity {
 		virtual void SaveGraphFromOptIndex(const string &location) override;
 
         virtual void LoadIndex(const string &location) override;
+		virtual void ReportStats() override;
 
         Hnsw(bool PrintProgress, const Space<dist_t> &space, const ObjectVector &data);
         void CreateIndex(const AnyParams &IndexParams) override;
@@ -520,6 +521,8 @@ namespace similarity {
         size_t ef_;
         size_t searchMethod_;
         size_t indexThreadQty_;
+		size_t navigationMethod_;
+		size_t numDistChecks_;
         const Space<dist_t> &space_;
         bool PrintProgress_;
         int delaunay_type_;
@@ -551,6 +554,10 @@ namespace similarity {
         enum AlgoType { kOld, kV1Merge, kHybrid };
 
         AlgoType searchAlgoType_;
+
+		// HNSW-FIX: different routing strategies
+		enum RoutingType { hierarchical, horizontal, hybrid };
+		RoutingType routingType_;
 
     protected:
         DISABLE_COPY_AND_ASSIGN(Hnsw);

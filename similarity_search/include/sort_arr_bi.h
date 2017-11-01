@@ -32,16 +32,21 @@ class SortArrBI {
   class Item {
    public:
     KeyType   key;
+	// HNSW-FIX:Add key2 to hold distance information
+	KeyType   key2;
     bool      used = false;
     DataType  data;
 
     Item() {}
     Item(const KeyType& k) : key(k) {}
     Item(const KeyType& k, const DataType& d) : key(k), data(d) {}
+	// HNSW-FIX:Add key2 to hold distance information
+	Item(const KeyType& k, const KeyType& k2, const DataType& d) : key(k), key2(k2), data(d) {}
 
     bool operator < (const Item& i2) const {
       return key < i2.key;
     }
+	
   };
   using value_type = DataType;
 
@@ -65,6 +70,17 @@ class SortArrBI {
     num_elems_++;
   }
 
+  // HNSW-FIX:Add key2 to hold distance information
+  // push_unsorted_grow may invalidate the reference returned by get_data() !!!!
+  void push_unsorted_grow(const KeyType& key, const KeyType& key2, const DataType& data) {
+	  if (num_elems_ + 1 >= v_.size()) resize(num_elems_ + 1);
+	  v_[num_elems_].used = false;
+	  v_[num_elems_].key = key;
+	  v_[num_elems_].key2 = key2;
+	  v_[num_elems_].data = data;
+	  num_elems_++;
+  }
+
   KeyType top_key() {
     return v_[num_elems_-1].key;
   }
@@ -76,6 +92,14 @@ class SortArrBI {
   void sort() {
     _mm_prefetch(&v_[0], _MM_HINT_T0);
     std::sort(v_.begin(), v_.begin() + num_elems_);
+  }
+
+  static bool orderBySecondKey(const Item& i1, const Item& i2) {
+	  return i1.key2 < i2.key2;
+  }
+
+  void sortByKey2() {
+	  std::sort(v_.begin(), v_.begin() + num_elems_, orderBySecondKey);
   }
 
   void swap(size_t x, size_t y) {
@@ -192,6 +216,50 @@ class SortArrBI {
     return curr;
   }
 
+  size_t push_or_replace_non_empty_exp(const KeyType& key, const KeyType& key2, const DataType& data) {
+	  // num_elems_ > 0
+	  unsigned curr = num_elems_ - 1;
+	  if (v_[curr].key <= key) {
+		  if (num_elems_ < v_.size()) {
+			  v_[num_elems_].used = false;
+			  v_[num_elems_].key = key;
+			  v_[num_elems_].key2 = key2;
+			  v_[num_elems_].data = data;
+			  return num_elems_++;
+		  }
+		  else {
+			  return num_elems_;
+		  }
+	  }
+	  unsigned prev = curr;
+
+	  unsigned d = 1;
+	  // always curr >= d
+	  while (curr > 0 && v_[curr].key > key) {
+		  prev = curr;
+		  curr -= d;
+		  d *= 2;
+		  if (d > curr) d = curr;
+	  }
+
+	  _mm_prefetch((char*)&v_[curr], _MM_HINT_T0);
+	  if (curr < prev) {
+		  curr = std::lower_bound(&v_[curr], &v_[prev], Item(key)) - &v_[0];
+	  }
+
+	  if (num_elems_ < v_.size()) num_elems_++;
+	  // curr + 1 <= num_elems_
+
+	  if (num_elems_ - (1 + curr) > 0)
+		  memmove(&v_[curr + 1], &v_[curr], (num_elems_ - (1 + curr)) * sizeof(v_[0]));
+
+
+	  v_[curr].used = false;
+	  v_[curr].key = key;
+	  v_[curr].key2 = key2;
+	  v_[curr].data = data;
+	  return curr;
+  }
 
   const std::vector<Item>& get_data() const {
     return this->v_;

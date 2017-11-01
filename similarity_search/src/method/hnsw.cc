@@ -38,6 +38,7 @@
 #include "rangequery.h"
 #include "space.h"
 #include "space/space_lp.h"
+#include "logging.h"
 
 #include <map>
 #include <set>
@@ -339,6 +340,7 @@ namespace similarity {
 		}
 
 		int prevSCC = -1;
+		int numAddedEdges = 0;
 		for (int i = ordered.size() - 1; i >= 0; i--) {
 			int v = ordered[i];
 
@@ -348,10 +350,15 @@ namespace similarity {
 				if (prevSCC >= 0) {
 					ElList_[v]->allFriends[0].push_back(ElList_[prevSCC]);
 					ElList_[prevSCC]->allFriends[0].push_back(ElList_[v]);
+					numAddedEdges+=2;
 				}
 				prevSCC = v;
 			}
 		}
+
+		LOG(LIB_INFO) << "================================================================";
+		LOG(LIB_INFO) << "#edges added by connectivity augmentation  = " << numAddedEdges;
+		LOG(LIB_INFO) << "================================================================";
 	}
 
 	// Random 0-to-N1 Function.
@@ -387,7 +394,6 @@ namespace similarity {
 		for (int v = 0; v < sizeV; ++v) {
 			int random_integer = rand_0toN1(sizeV);
 			int prob = (rand() % 100);
-
 			if (prob < random_factor) {
 				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
 				int pos = (rand() % ElList_[v]->allFriends[0].size());
@@ -566,7 +572,7 @@ namespace similarity {
 
 		if (connectivity_augmentation) {
 			ConnectivityAugmentationNonRecursive();
-			ConnectivityAugmentationNonRecursive();
+			//ConnectivityAugmentationNonRecursive();
 			//ConnectivityAugmentationRecursive();
 			//ConnectivityAugmentationRecursive();
 		}		
@@ -706,8 +712,10 @@ namespace similarity {
         // ef and efSearch are going to be parameter-synonyms with the default value 20
         pmgr.GetParamOptional("ef", ef_, 20);
         pmgr.GetParamOptional("efSearch", ef_, ef_);
+		pmgr.GetParamOptional("navigationMethod", navigationMethod_, 0); // 0: similarity distance based; 1: hybridize distance and degree
+		pmgr.GetParamOptional("numDistChecks", numDistChecks_, ULLONG_MAX);
 
-        int tmp;
+		int tmp;
         pmgr.GetParamOptional(
             "searchMethod", tmp, 0); // this is just to prevent terminating the program when searchMethod is specified
 
@@ -724,10 +732,25 @@ namespace similarity {
             throw runtime_error("algoType should be one of the following: old, v1merge");
         }
 
+		// HNSW-FIX: different routing strategies
+		pmgr.GetParamOptional("routingType", tmps, "hierarchical");
+		ToLower(tmps);
+		if (tmps == "hierarchical")
+			routingType_ = hierarchical;
+		else if (tmps == "horizontal")
+			routingType_ = horizontal;
+		else if (tmps == "hybrid")
+			routingType_ = hybrid;
+		else {
+			throw runtime_error("routingType_ should be one of the following: hierarchical, horizontal, hybrid");
+		}
+
         pmgr.CheckUnused();
         LOG(LIB_INFO) << "Set HNSW query-time parameters:";
         LOG(LIB_INFO) << "ef(Search)         =" << ef_;
         LOG(LIB_INFO) << "algoType           =" << searchAlgoType_;
+		LOG(LIB_INFO) << "routingType        =" << routingType_;
+		LOG(LIB_INFO) << "numDistChecks      =" << numDistChecks_;
     }
 
     template <typename dist_t>
@@ -1153,6 +1176,29 @@ namespace similarity {
         input.close();
     }
 
+	template <typename dist_t>
+	void Hnsw<dist_t>::ReportStats()
+	{
+
+		// Distribution of #nodes at each level
+		vector<int> distnodes = vector<int>(maxlevel_ + 1);
+
+		totalElementsStored_ = ElList_.size();
+		for (size_t i = 0; i < totalElementsStored_; i++) {
+			int nodeMaxLevel = ElList_[i]->level;
+			for (int j = 0; j <= nodeMaxLevel; j++) {
+				distnodes[j]++;
+			}
+		}
+
+
+		LOG(LIB_INFO) << "=========================================";
+		for (int j = 0; j <= maxlevel_; j++) {
+			LOG(LIB_INFO) << ">>>> # of nodes at level " << j << " : " << distnodes[j];
+		}
+		LOG(LIB_INFO) << "=========================================";
+	}
+
     template <typename dist_t>
     void
     Hnsw<dist_t>::baseSearchAlgorithmOld(KNNQuery<dist_t> *query)
@@ -1169,6 +1215,8 @@ namespace similarity {
 
         dist_t d = query->DistanceObjLeft(currObj);
         dist_t curdist = d;
+		size_t curOutDegree = 0;
+		float navScore = 0;
         HnswNode *curNode = provider;
         for (int i = maxlevel1; i > 0; i--) {
             bool changed = true;
@@ -1195,8 +1243,17 @@ namespace similarity {
         priority_queue<HnswNodeDistCloser<dist_t>> closestDistQueue1; // The set of closest found elements
 
         HnswNodeDistFarther<dist_t> ev(curdist, curNode);
-        candidateQueue.emplace(curdist, curNode);
-        closestDistQueue1.emplace(curdist, curNode);
+		if (navigationMethod_ == 1) {
+			curOutDegree = max<size_t>(curNode->getAllFriends(0).size(), 0.00001);
+			curdist = max<dist_t>(curdist, 0.00001); // Considering two nodes with 0.00001 to be close enough to do an exploration.
+			navScore = (float)curdist / curOutDegree;
+			//candidateQueue.emplace(navScore, curdist, curNode);
+			//closestDistQueue1.emplace(navScore, curdist, curNode);
+		}
+		else {
+			candidateQueue.emplace(curdist, curNode);
+			closestDistQueue1.emplace(curdist, curNode);
+		}
 
         query->CheckAndAddToResult(curdist, curNode->getData());
         massVisited[curNode->getId()] = currentV;
@@ -1261,36 +1318,76 @@ namespace similarity {
 
         HnswNode *provider;
         int maxlevel1 = enterpoint_->level;
-        provider = enterpoint_;
+		// HNSW-FIX: different routing strategies
+		if (routingType_ == hierarchical) {
+			provider = enterpoint_;
+		}
+		else if (routingType_ == horizontal) {
+			int numNodes = ElList_.size();
+			int random_integer = rand_0toN1(numNodes);
+			provider = ElList_[random_integer];
+		}
+		else if (routingType_ == hybrid) {
+			throw runtime_error("Hybrid routing not supported yet!");
+		} else {
+			throw runtime_error("Invalid routing type!");
+		}
+
 
         const Object *currObj = provider->getData();
 
         dist_t d = query->DistanceObjLeft(currObj);
+		// HNSW-FIX: Hybrid scoring
         dist_t curdist = d;
+		size_t curOutDegree = 0;
+		float navScore = 0;
         HnswNode *curNode = provider;
         for (int i = maxlevel1; i > 0; i--) {
             bool changed = true;
             while (changed) {
                 changed = false;
 
-                const vector<HnswNode *> &neighbor = curNode->getAllFriends(i);
-                for (auto iter = neighbor.begin(); iter != neighbor.end(); ++iter) {
-                    _mm_prefetch((char *)(*iter)->getData(), _MM_HINT_T0);
-                }
-                for (auto iter = neighbor.begin(); iter != neighbor.end(); ++iter) {
-                    currObj = (*iter)->getData();
-                    d = query->DistanceObjLeft(currObj);
-                    if (d < curdist) {
-                        curdist = d;
-                        curNode = *iter;
-                        changed = true;
-                    }
-                }
+				const vector<HnswNode *> *neighbor = nullptr;
+				// HNSW-FIX: different routing strategies
+				if (routingType_ == hierarchical) {					
+					neighbor = &(curNode->getAllFriends(i));
+				}
+				else if (routingType_ == horizontal) {					
+					neighbor = &(curNode->getAllFriends(0));
+				}
+				else if (routingType_ == hybrid) {
+					throw runtime_error("Hybrid routing not supported yet!");
+				}
+				else {
+					throw runtime_error("Invalid routing type!");
+				}
+				for (auto iter = (*neighbor).begin(); iter != (*neighbor).end(); ++iter) {
+					_mm_prefetch((char *)(*iter)->getData(), _MM_HINT_T0);
+				}
+				for (auto iter = (*neighbor).begin(); iter != (*neighbor).end(); ++iter) {
+					currObj = (*iter)->getData();
+					d = query->DistanceObjLeft(currObj);
+					if (d < curdist) {
+						curdist = d;
+						curNode = *iter;
+						changed = true;
+					}
+				}
             }
         }
 
         SortArrBI<dist_t, HnswNode *> sortedArr(max<size_t>(ef_, query->GetK()));
-        sortedArr.push_unsorted_grow(curdist, curNode);
+
+		// HNSW-FIX: Hybrid scoring
+		if (navigationMethod_ == 1) {
+			curOutDegree = max<size_t>(curNode->getAllFriends(0).size(), 0.00001);
+			d = max<dist_t>(d, 0.00001); // Considering two nodes with 0.00001 to be close enough to do an exploration.
+			navScore = (float)d / curOutDegree;
+			sortedArr.push_unsorted_grow(navScore, d, curNode);
+		}
+		else {
+			sortedArr.push_unsorted_grow(curdist, curNode);
+		}        
 
         int_fast32_t currElem = 0;
 
@@ -1306,6 +1403,7 @@ namespace similarity {
         // Extraction of the neighborhood to find k nearest neighbors.
         ////////////////////////////////////////////////////////////////////////////////
 
+		bool hasReachedLimitChecks = false;
         while (currElem < min(sortedArr.size(), ef_)) {
             auto &e = queueData[currElem];
             CHECK(!e.used);
@@ -1333,9 +1431,26 @@ namespace similarity {
                     currObj = (*iter)->getData();
                     d = query->DistanceObjLeft(currObj);
 
-                    if (d < topKey || sortedArr.size() < ef_) {
-                        itemBuff[itemQty++] = QueueItem(d, *iter);
-                    }
+					// HNSW-FIX: Hybrid scoring
+					if (navigationMethod_ == 1) {
+						curOutDegree = max<size_t>((*iter)->getAllFriends(0).size(), 0.00001);
+						d = max<dist_t>(d, 0.00001); // Considering two nodes with 0.00001 to be close enough to do an exploration.
+						navScore = (float) d / curOutDegree;	
+						if (navScore < topKey || sortedArr.size() < ef_) {
+							itemBuff[itemQty++] = QueueItem(navScore, d, *iter);
+						}
+					}
+					else {
+						if (d < topKey || sortedArr.size() < ef_) {
+							itemBuff[itemQty++] = QueueItem(d, *iter);
+						}
+					}
+
+					// HNSW-FIX: Stop condition: reached the check budget.
+					if (query->DistanceComputations() >= numDistChecks_) {
+						hasReachedLimitChecks = true;
+						break;
+					}
                 }
             }
 
@@ -1353,7 +1468,13 @@ namespace similarity {
                     }
                 } else {
                     for (size_t ii = 0; ii < itemQty; ++ii) {
-                        size_t insIndex = sortedArr.push_or_replace_non_empty_exp(itemBuff[ii].key, itemBuff[ii].data);
+						// HNSW-FIX: Hybrid scoring
+						if (navigationMethod_ == 1) {
+							size_t insIndex = sortedArr.push_or_replace_non_empty_exp(itemBuff[ii].key, itemBuff[ii].key2, itemBuff[ii].data);
+						}
+						else {
+							size_t insIndex = sortedArr.push_or_replace_non_empty_exp(itemBuff[ii].key, itemBuff[ii].data);
+						}                        
 
                         if (insIndex < currElem) {
                             // LOG(LIB_INFO) << "@@@ " << currElem << " -> " << insIndex;
@@ -1362,14 +1483,29 @@ namespace similarity {
                     }
                 }
             }
+
             // To ensure that we either reach the end of the unexplored queue or currElem points to the first unused element
             while (currElem < sortedArr.size() && queueData[currElem].used == true)
                 ++currElem;
+
+			// HNSW-FIX: Stop condition: reached the check budget.
+			if (hasReachedLimitChecks) {
+				break;
+			}
         }
 
-        for (int_fast32_t i = 0; i < query->GetK() && i < sortedArr.size(); ++i) {
-            query->CheckAndAddToResult(queueData[i].key, queueData[i].data->getData());
-        }
+		// HNSW-FIX: Hybrid scoring
+		if (navigationMethod_ == 1) {			
+			sortedArr.sortByKey2();
+			for (int_fast32_t i = 0; i < query->GetK() && i < sortedArr.size(); ++i) {
+				query->CheckAndAddToResult(queueData[i].key2, queueData[i].data->getData());
+			}
+		}
+		else {
+			for (int_fast32_t i = 0; i < query->GetK() && i < sortedArr.size(); ++i) {
+				query->CheckAndAddToResult(queueData[i].key, queueData[i].data->getData());
+			}
+		}
 
         visitedlistpool->releaseVisitedList(vl);
     }
