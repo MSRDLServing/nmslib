@@ -521,7 +521,6 @@ namespace similarity {
         size_t ef_;
         size_t searchMethod_;
         size_t indexThreadQty_;
-		size_t navigationMethod_;
 		size_t numDistChecks_;
         const Space<dist_t> &space_;
         bool PrintProgress_;
@@ -551,9 +550,14 @@ namespace similarity {
         size_t memoryPerObject_;
         float (*fstdistfunc_)(const float *pVect1, const float *pVect2, size_t &qty, float *TmpRes);
 
-        enum AlgoType { kOld, kV1Merge, kHybrid };
+        enum InjectRandType { noLink, addLink, rewireLink };
+		InjectRandType injectRandType_;
 
-        AlgoType searchAlgoType_;
+		enum AlgoType { kOld, kV1Merge, kHybrid };
+		AlgoType searchAlgoType_;
+
+		enum NavType { distanceBased, hybridBased };
+		NavType navType_;
 
 		// HNSW-FIX: different routing strategies
 		enum RoutingType { hierarchical, horizontal, hybrid };
@@ -570,8 +574,8 @@ namespace similarity {
 		void getTranspose(ElementList &grElList);
 		void dfsSearchSCC(ElementList &grElList, int v, bool visited[]);
 		void dfsSearchSCCNonRecur(ElementList &grElList, int v, bool visited[]);
-		void InjectRandomnessByAdding(int random_factor);
-		void InjectRandomnessByRewiring(int random_factor);
+		void InjectRandomnessByAddingLinks(int random_factor);
+		void InjectRandomnessByRewiringLinks(int random_factor);
     };
 
     typedef unsigned char vl_type;

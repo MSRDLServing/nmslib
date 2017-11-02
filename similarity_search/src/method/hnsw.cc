@@ -370,35 +370,42 @@ namespace similarity {
 	}
 
 	template <typename dist_t>
-	void Hnsw<dist_t>::InjectRandomnessByAdding(int random_factor)
+	void Hnsw<dist_t>::InjectRandomnessByAddingLinks(int random_factor)
 	{
 		srand(42); // Set seed for randomizing.
 
 		int sizeV = data_.size();
 		for (int v = 0; v < sizeV; ++v) {
-			int random_integer = rand_0toN1(sizeV);
-			int prob = (rand() % 100);
-			
-			if (prob < random_factor) {
-				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
-			}			
+			int numFriends = ElList_[v]->allFriends[0].size();
+			for (int i = 0; i < numFriends; i++) {
+				// Add probabilistically the number of links proportional to the number of existing friends. 
+				int random_integer = rand_0toN1(sizeV);
+				int prob = (rand() % 100);
+				if (prob < random_factor) {
+					ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
+				}
+			}
 		}
 	}
 
 	template <typename dist_t>
-	void Hnsw<dist_t>::InjectRandomnessByRewiring(int random_factor)
+	void Hnsw<dist_t>::InjectRandomnessByRewiringLinks(int random_factor)
 	{
 		srand(42); // Set seed for randomizing.
 
 		int sizeV = data_.size();
 		for (int v = 0; v < sizeV; ++v) {
-			int random_integer = rand_0toN1(sizeV);
-			int prob = (rand() % 100);
-			if (prob < random_factor) {
-				ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
-				int pos = (rand() % ElList_[v]->allFriends[0].size());
-				std::swap(ElList_[v]->allFriends[0][pos], ElList_[v]->allFriends[0].back());
-				ElList_[v]->allFriends[0].pop_back();
+			int numFriends = ElList_[v]->allFriends[0].size();
+			for (int i = 0; i < numFriends; i++) {
+				// For each existing friend, probabilistically rewire it to a remote node.
+				int random_integer = rand_0toN1(sizeV);
+				int prob = (rand() % 100);
+				if (prob < random_factor) {
+					ElList_[v]->allFriends[0].push_back(ElList_[random_integer]);
+					/*int pos = (rand() % ElList_[v]->allFriends[0].size());*/ // Another possibility is to randomly select one node from the friend list to rewire.
+					std::swap(ElList_[v]->allFriends[0][i], ElList_[v]->allFriends[0].back());
+					ElList_[v]->allFriends[0].pop_back();
+				}
 			}
 		}
 	}
@@ -436,8 +443,19 @@ namespace similarity {
         pmgr.GetParamOptional("skip_optimized_index", skip_optimized_index, 0);
 		int connectivity_augmentation = 0;
 		pmgr.GetParamOptional("connectivity_augmentation", connectivity_augmentation, 0);
-		int inject_randomness = 0;
-		pmgr.GetParamOptional("inject_randomness", inject_randomness, 0); // 0: No injection of randomness, 1: Add random links,  2: rewire existing links
+		
+		string tmps;
+		pmgr.GetParamOptional("injectRandType", tmps, "noLink");
+		ToLower(tmps);
+		if (tmps == "nolink")
+			injectRandType_ = noLink;
+		else if (tmps == "addlink")
+			injectRandType_ = addLink;
+		else if (tmps == "rewirelink")
+			injectRandType_ = rewireLink;
+		else {
+			throw runtime_error("injectRandType should be one of the following: none, add, rewire");
+		}
 		int random_factor = 0;
 		pmgr.GetParamOptional("random_factor", random_factor, 50); // Random factor is in the range of 0 to 100
 
@@ -452,7 +470,7 @@ namespace similarity {
         LOG(LIB_INFO) << "delaunay_type       = " << delaunay_type_;
 
 		LOG(LIB_INFO) << "connectivity_augmentation= " << connectivity_augmentation;
-		LOG(LIB_INFO) << "inject_randomness       = " << inject_randomness;
+		LOG(LIB_INFO) << "injectRandType       = " << injectRandType_;
 		LOG(LIB_INFO) << "random_factor       = " << random_factor;
 
         SetQueryTimeParams(getEmptyParams());
@@ -566,8 +584,8 @@ namespace similarity {
         data_level0_memory_ = NULL;
         linkLists_ = NULL;
 
-		if (inject_randomness == 2) {
-			InjectRandomnessByRewiring(random_factor);
+		if (injectRandType_ == rewireLink) {
+			InjectRandomnessByRewiringLinks(random_factor);
 		}
 
 		if (connectivity_augmentation) {
@@ -577,8 +595,8 @@ namespace similarity {
 			//ConnectivityAugmentationRecursive();
 		}		
 
-		if (inject_randomness == 1) {
-			InjectRandomnessByAdding(random_factor);
+		if (injectRandType_ == addLink) {
+			InjectRandomnessByAddingLinks(random_factor);
 		}
 
         if (skip_optimized_index) {
@@ -712,7 +730,6 @@ namespace similarity {
         // ef and efSearch are going to be parameter-synonyms with the default value 20
         pmgr.GetParamOptional("ef", ef_, 20);
         pmgr.GetParamOptional("efSearch", ef_, ef_);
-		pmgr.GetParamOptional("navigationMethod", navigationMethod_, 0); // 0: similarity distance based; 1: hybridize distance and degree
 		pmgr.GetParamOptional("numDistChecks", numDistChecks_, ULLONG_MAX);
 
 		int tmp;
@@ -732,6 +749,17 @@ namespace similarity {
             throw runtime_error("algoType should be one of the following: old, v1merge");
         }
 
+		// distanceBased: distance based search; hybridBased: hybridize distance and degree
+		pmgr.GetParamOptional("navType", tmps, "distanceBased");
+		ToLower(tmps);
+		if (tmps == "distancebased")
+			navType_ = distanceBased;
+		else if (tmps == "hybridbased")
+			navType_ = hybridBased;
+		else {
+			throw runtime_error("navTypeType should be one of the following: distanceBased, hybridBased");
+		}
+
 		// HNSW-FIX: different routing strategies
 		pmgr.GetParamOptional("routingType", tmps, "hierarchical");
 		ToLower(tmps);
@@ -742,7 +770,7 @@ namespace similarity {
 		else if (tmps == "hybrid")
 			routingType_ = hybrid;
 		else {
-			throw runtime_error("routingType_ should be one of the following: hierarchical, horizontal, hybrid");
+			throw runtime_error("routingType should be one of the following: hierarchical, horizontal, hybrid");
 		}
 
         pmgr.CheckUnused();
@@ -1243,17 +1271,9 @@ namespace similarity {
         priority_queue<HnswNodeDistCloser<dist_t>> closestDistQueue1; // The set of closest found elements
 
         HnswNodeDistFarther<dist_t> ev(curdist, curNode);
-		if (navigationMethod_ == 1) {
-			curOutDegree = max<size_t>(curNode->getAllFriends(0).size(), 0.00001);
-			curdist = max<dist_t>(curdist, 0.00001); // Considering two nodes with 0.00001 to be close enough to do an exploration.
-			navScore = (float)curdist / curOutDegree;
-			//candidateQueue.emplace(navScore, curdist, curNode);
-			//closestDistQueue1.emplace(navScore, curdist, curNode);
-		}
-		else {
-			candidateQueue.emplace(curdist, curNode);
-			closestDistQueue1.emplace(curdist, curNode);
-		}
+		candidateQueue.emplace(curdist, curNode);
+		closestDistQueue1.emplace(curdist, curNode);
+
 
         query->CheckAndAddToResult(curdist, curNode->getData());
         massVisited[curNode->getId()] = currentV;
@@ -1379,7 +1399,7 @@ namespace similarity {
         SortArrBI<dist_t, HnswNode *> sortedArr(max<size_t>(ef_, query->GetK()));
 
 		// HNSW-FIX: Hybrid scoring
-		if (navigationMethod_ == 1) {
+		if (navType_ == hybridBased) {
 			curOutDegree = max<size_t>(curNode->getAllFriends(0).size(), 0.00001);
 			d = max<dist_t>(d, 0.00001); // Considering two nodes with 0.00001 to be close enough to do an exploration.
 			navScore = (float)d / curOutDegree;
@@ -1432,7 +1452,7 @@ namespace similarity {
                     d = query->DistanceObjLeft(currObj);
 
 					// HNSW-FIX: Hybrid scoring
-					if (navigationMethod_ == 1) {
+					if (navType_ == hybridBased) {
 						curOutDegree = max<size_t>((*iter)->getAllFriends(0).size(), 0.00001);
 						d = max<dist_t>(d, 0.00001); // Considering two nodes with 0.00001 to be close enough to do an exploration.
 						navScore = (float) d / curOutDegree;	
@@ -1469,7 +1489,7 @@ namespace similarity {
                 } else {
                     for (size_t ii = 0; ii < itemQty; ++ii) {
 						// HNSW-FIX: Hybrid scoring
-						if (navigationMethod_ == 1) {
+						if (navType_ == hybridBased) {
 							size_t insIndex = sortedArr.push_or_replace_non_empty_exp(itemBuff[ii].key, itemBuff[ii].key2, itemBuff[ii].data);
 						}
 						else {
@@ -1495,7 +1515,7 @@ namespace similarity {
         }
 
 		// HNSW-FIX: Hybrid scoring
-		if (navigationMethod_ == 1) {			
+		if (navType_ == hybridBased) {
 			sortedArr.sortByKey2();
 			for (int_fast32_t i = 0; i < query->GetK() && i < sortedArr.size(); ++i) {
 				query->CheckAndAddToResult(queueData[i].key2, queueData[i].data->getData());
