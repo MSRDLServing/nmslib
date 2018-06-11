@@ -308,6 +308,12 @@ public:
 
       if (LogInfo) LOG(LIB_INFO) << ">>>> Computing effectiveness metrics for " << Method.StrDesc();
 
+      std::ofstream ann_ids_output("approximated_nn_ids_" + std::to_string(numquery) +".txt");
+      CHECK_MSG(ann_ids_output, "Cannot open file approximated_nn_ids_for writing");
+      std::ofstream exact_nn_ids_output("exact_nn_ids_" + std::to_string(numquery) +".txt");
+      CHECK_MSG(exact_nn_ids_output, "Cannot open file exact_nn_ids_for writing");
+      std::ofstream ann_nn_dist_output("ann_nn_dist_output_q" + std::to_string(numquery) +".txt");
+      CHECK_MSG(ann_nn_dist_output, "Cannot open file ann_nn_dist_output_for writing");
       for (unsigned QueryPart = 0; QueryPart < ThreadTestQty; ++QueryPart) {
         const BenchmarkThreadParams<QueryType, QueryCreatorType>*   params = ThreadParams[QueryPart];
        
@@ -320,6 +326,21 @@ public:
           const GoldStandard<dist_t>&  QueryGS = *goldStand[q];
 
           EvalResults<dist_t>     Eval(config.GetSpace(), pQuery, QueryGS, recallOnly);
+          std::vector<ResultEntry<dist_t>> ann_rs = Eval.GetApproxEntries();
+          for (int i = 0; i < ann_rs.size(); i++) {
+			// Print out K NNs of the current qeury j
+			ann_ids_output << ann_rs[i].mId << " ";
+			ann_nn_dist_output << ann_rs[i].mDist << " ";
+          }
+          ann_ids_output << "\n";
+          ann_nn_dist_output << "\n";
+
+          std::unordered_set<IdType> exact_nn_rs = Eval.GetExactResultIds();
+          for (auto iter = exact_nn_rs.begin(); iter != exact_nn_rs.end(); iter++) {
+			// Print out K NNs of the current qeury j
+        	  exact_nn_ids_output << *iter << " ";
+          }
+          exact_nn_ids_output << "\n";
 
           NumCloser[MethNum]    += Eval.GetNumCloser();
           RecallAt1[MethNum]    += Eval.GetRecallAt1();
@@ -338,6 +359,8 @@ public:
 
         }
       }
+      ann_ids_output.close();
+      ann_nn_dist_output.close();
     }
 
     config.GetSpace().SetIndexPhase();

@@ -112,6 +112,11 @@ public:
     * 1/K sum_{i=1}^K   i/pos(i)
     */
   double GetPrecisionOfApprox() const { return PrecisionOfApprox_; }
+
+  std::vector<ResultEntry<dist_t>> GetApproxEntries() const { return ApproxEntries_; }
+
+  std::unordered_set<IdType> GetExactResultIds() const { return ExactResultIds_; }
+
 private:
   size_t K_;
 
