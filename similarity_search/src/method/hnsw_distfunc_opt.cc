@@ -81,7 +81,7 @@ namespace similarity {
         _mm256_store_ps(TmpRes, sum);
         float res = TmpRes[0] + TmpRes[1] + TmpRes[2] + TmpRes[3] + TmpRes[4] + TmpRes[5] + TmpRes[6] + TmpRes[7];
 
-        return (res);
+        return sqrt(res);
 #else
         // size_t qty4 = qty >> 2;
         size_t qty16 = qty >> 4;
@@ -127,7 +127,7 @@ namespace similarity {
         _mm_store_ps(TmpRes, sum);
         float res = TmpRes[0] + TmpRes[1] + TmpRes[2] + TmpRes[3];
 
-        return (res);
+        return sqrt(res);
 #endif
     };
 

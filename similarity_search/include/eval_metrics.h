@@ -72,10 +72,10 @@ struct EvalMetricsBase {
   
           for (size_t i = 0; i < std::min(SortedAllEntries.size(), ApproxEntries.size()); ++i ) {
             LOG(LIB_INFO) << "Ex: " << SortedAllEntries[i].mDist << " id = " << SortedAllEntries[i].mId <<
-                         " -> Apr: "<< ApproxEntries[i].mDist << " id = " << ApproxEntries[i].mId << 
+                         " -> Apr: "<< ApproxEntries[i].mDist << " id = " << ApproxEntries[i].mId <<
                          " 1 - ratio: " << (1 - mn/mx) << " diff: " << (mx - mn);
           }
-          LOG(LIB_FATAL) << "bug: the approximate query should not return objects "
+          LOG(LIB_WARNING) << "bug: the approximate query should not return objects "
                          << "that are closer to the query than object returned by "
                          << "(exact) sequential searching!"
                          << std::setprecision(std::numeric_limits<dist_t>::digits10)
@@ -102,9 +102,9 @@ struct EvalMetricsBase {
           for (size_t i = 0; i < std::min(SortedAllEntries.size(), ApproxEntries.size()); ++i ) {
             LOG(LIB_INFO) << "E: " << SortedAllEntries[i].mDist << " -> " << ApproxEntries[i].mDist;
           }
-          LOG(LIB_FATAL) << "bug: p = " << p << " k = " << k;
+          LOG(LIB_WARNING) << "bug: p = " << p << " k = " << k;
         }
-        CHECK(p >= k);
+//        CHECK(p >= k);
         obj(k, LastEqualP);
       }
     }

@@ -1,464 +1,67 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject>
-<storageModule moduleId="org.eclipse.cdt.core.settings">
-<cconfiguration id="org.eclipse.cdt.core.default.config.1">
-<storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="org.eclipse.cdt.core.default.config.1" moduleId="org.eclipse.cdt.core.settings" name="Configuration">
-<externalSettings/>
-<extensions>
-<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser">
-<attribute key="addr2line" value="addr2line"/>
-<attribute key="c++filt" value="c++filt"/>
-</extension>
-</extensions>
-</storageModule>
-<storageModule moduleId="org.eclipse.cdt.core.language.mapping">
-<project-mappings/>
-</storageModule>
-<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-<storageModule moduleId="org.eclipse.cdt.core.pathentry">
-<pathentry excluding="**/CMakeFiles/" kind="out" path=""/>
-<pathentry include="/home/minjiaz/workspace/nmslib/similarity_search/include" kind="inc" path="" system="true"/>
-<pathentry include="/home/minjiaz/workspace/nmslib/similarity_search/include/space" kind="inc" path="" system="true"/>
-</storageModule>
-<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
-<buildTargets>
-<target name=": install" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>install</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": list_install_components" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>list_install_components</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": install/strip" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>install/strip</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": install/local" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>install/local</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": rebuild_cache" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>rebuild_cache</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": edit_cache" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>edit_cache</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": all" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": clean" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[lib] NonMetricSpaceLib" path="src" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>NonMetricSpaceLib</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[lib] NonMetricSpaceLib/fast" path="src" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>NonMetricSpaceLib/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[lib] NonMetricSpaceLib" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>NonMetricSpaceLib</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[lib] NonMetricSpaceLib" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/src" "/usr/bin/cmake" -P "CMakeFiles/NonMetricSpaceLib.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": all" path="src" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": clean" path="src" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] report_intr_dim" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>report_intr_dim</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] report_intr_dim/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>report_intr_dim/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] report_intr_dim" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>report_intr_dim</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] report_intr_dim" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/report_intr_dim.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] bench_distfunc" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>bench_distfunc</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] bench_distfunc/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>bench_distfunc/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] bench_distfunc" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>bench_distfunc</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] bench_distfunc" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/bench_distfunc.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] experiment" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>experiment</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] experiment/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>experiment/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] experiment" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>experiment</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] experiment" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/experiment.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] test_clust" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>test_clust</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] test_clust/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>test_clust/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] test_clust" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>test_clust</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] test_clust" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/test_clust.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] knn_stat" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>knn_stat</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] knn_stat/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>knn_stat/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] knn_stat" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>knn_stat</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] knn_stat" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/knn_stat.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] tune_vptree" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>tune_vptree</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] tune_vptree/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>tune_vptree/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] tune_vptree" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>tune_vptree</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] tune_vptree" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/tune_vptree.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] bench_projection" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>bench_projection</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] bench_projection/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>bench_projection/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] bench_projection" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>bench_projection</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] bench_projection" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/bench_projection.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] dummy_app" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>dummy_app</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] dummy_app/fast" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>dummy_app/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] dummy_app" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>dummy_app</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] dummy_app" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/apps" "/usr/bin/cmake" -P "CMakeFiles/dummy_app.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": all" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": clean" path="apps" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] bunit" path="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>bunit</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] bunit/fast" path="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>bunit/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] bunit" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>bunit</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] bunit" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/test" "/usr/bin/cmake" -P "CMakeFiles/bunit.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] test_integr" path="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>test_integr</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="[exe] test_integr/fast" path="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>test_integr/fast</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Build" path="[Targets]/[exe] test_integr" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments>-C "/home/minjiaz/workspace/nmslib/similarity_search" </buildArguments>
-<buildTarget>test_integr</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name="Clean" path="[Targets]/[exe] test_integr" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/cmake</buildCommand>
-<buildArguments>-E chdir "/home/minjiaz/workspace/nmslib/similarity_search/test" "/usr/bin/cmake" -P "CMakeFiles/test_integr.dir/cmake_clean.cmake"</buildArguments>
-<buildTarget></buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": all" path="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-<target name=": clean" path="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>/usr/bin/make</buildCommand>
-<buildArguments></buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>true</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-</target>
-</buildTargets>
-</storageModule>
-<storageModule moduleId="scannerConfiguration">
-<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
-<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
-<buildOutputProvider>
-<openAction enabled="true" filePath=""/>
-<parser enabled="true"/>
-</buildOutputProvider>
-<scannerInfoProvider id="specsFile">
-<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="/usr/bin/cc" useDefault="true"/>
-<parser enabled="true"/>
-</scannerInfoProvider>
-</profile>
-<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
-<buildOutputProvider>
-<openAction enabled="true" filePath=""/>
-<parser enabled="true"/>
-</buildOutputProvider>
-<scannerInfoProvider id="makefileGenerator">
-<runAction arguments="-f ${project_name}_scd.mk" command="/usr/bin/make" useDefault="true"/>
-<parser enabled="true"/>
-</scannerInfoProvider>
-</profile>
-</storageModule>
-</cconfiguration>
-</storageModule>
-<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<project id="NonMetricSpaceLib.null.1" name="NonMetricSpaceLib"/>
-</storageModule>
+<?fileVersion 5.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage2">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.toolchain.gnu.base.605166818">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.base.605166818" moduleId="org.eclipse.cdt.core.settings" name="Default">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration buildProperties="" id="cdt.managedbuild.toolchain.gnu.base.605166818" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.base.605166818.1503375254" name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.1802063012" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.GNU_ELF" id="cdt.managedbuild.target.gnu.platform.base.1939050677" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<builder id="cdt.managedbuild.target.gnu.builder.base.837007087" managedBuildOn="false" name="Gnu Make Builder.Default" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.301542385" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.2034265141" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1344360781" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1685089720" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1683649328" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1091366969" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+		<pathentry excluding="**/CMakeFiles/" kind="out" path=""/>
+		<pathentry include="/home/minjiaz/workspace/nmslib/similarity_search/include" kind="inc" path="" system="true"/>
+		<pathentry include="/home/minjiaz/workspace/nmslib/similarity_search/include/space" kind="inc" path="" system="true"/>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="hnsw.null.110829488" name="hnsw"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
+		<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+			<buildOutputProvider>
+				<openAction enabled="true" filePath=""/>
+				<parser enabled="true"/>
+			</buildOutputProvider>
+			<scannerInfoProvider id="specsFile">
+				<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="/usr/bin/cc" useDefault="true"/>
+				<parser enabled="true"/>
+			</scannerInfoProvider>
+		</profile>
+		<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
+			<buildOutputProvider>
+				<openAction enabled="true" filePath=""/>
+				<parser enabled="true"/>
+			</buildOutputProvider>
+			<scannerInfoProvider id="makefileGenerator">
+				<runAction arguments="-f ${project_name}_scd.mk" command="/usr/bin/make" useDefault="true"/>
+				<parser enabled="true"/>
+			</scannerInfoProvider>
+		</profile>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 </cproject>
